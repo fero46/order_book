@@ -5,6 +5,7 @@ import static spark.Spark.get;
 import static spark.Spark.port;
 import static spark.Spark.post;
 
+import io.meduse.data.ExchangeConfiguration;
 import io.meduse.data.HttpSuccess;
 import io.meduse.data.MarketData;
 import io.meduse.data.MarketDetail;
@@ -25,8 +26,8 @@ public class WebService implements Runnable {
 
 	@Override
 	public void run() {
-		System.out.println("Start Port");
-		port(8080);
+		System.out.println("Start Webservice");
+		port(ExchangeConfiguration.WEB_SERVICE_PORT);
 		get("/market", (request, response) -> {
 			return new MarketData(marketManager);
 		}, new JsonTransformer());

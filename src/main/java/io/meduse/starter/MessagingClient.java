@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import io.meduse.data.ExchangeConfiguration;
 import io.meduse.exchange.MarketManager;
 import io.meduse.exchange.Order;
 import io.meduse.messages.OrderMessage;
@@ -24,13 +25,13 @@ public class MessagingClient implements Runnable {
 	public MessagingClient(MarketManager marketManager) {
 
 		this.marketManager = marketManager;
-		AwsCredentialsProvider credsV2 = StaticCredentialsProvider
-				.create(AwsBasicCredentials.create("accesskey", "secretkey"));
+		AwsCredentialsProvider credsV2 = StaticCredentialsProvider.create(AwsBasicCredentials
+				.create(ExchangeConfiguration.AWS_ACCESS_KEY, ExchangeConfiguration.AWS_ACCESS_PASSWORD));
 		URI endpointOverride;
 		try {
-			endpointOverride = new URI("http://localhost:4566");
-			sqsClient = SqsClient.builder().endpointOverride(endpointOverride).region(Region.EU_CENTRAL_1)
-					.credentialsProvider(credsV2).build();
+			endpointOverride = new URI(ExchangeConfiguration.AWS_END_POINT);
+			sqsClient = SqsClient.builder().endpointOverride(endpointOverride)
+					.region(Region.of(ExchangeConfiguration.AWS_REGION)).credentialsProvider(credsV2).build();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}

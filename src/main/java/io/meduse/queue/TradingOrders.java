@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.meduse.data.ExchangeConfiguration;
 import io.meduse.exchange.Order;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
@@ -14,18 +15,21 @@ import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 
 public class TradingOrders {
-	private static final String TRADING_MESSAGING_QUEUE = "TRADE_MESSAGE";
-
+	private static final String TRADING_MESSAGING_QUEUE = ExchangeConfiguration.AWS_INCOMMING_QUEUE_NAME;
+	
+	
 	private final SqsClient sqsClient;
 
 	public TradingOrders(SqsClient sqsClient) {
 		this.sqsClient = sqsClient;
-		CreateQueueRequest queueName = CreateQueueRequest.builder().queueName(TRADING_MESSAGING_QUEUE).build();
-		try {
-			sqsClient.createQueue(queueName);
-		} catch (Exception e) {
-			System.out.println(e.getLocalizedMessage());
-			System.out.println("queue exists");
+		if (ExchangeConfiguration.TRY_TO_CREATE_QUEUE == "yes") {
+			CreateQueueRequest queueName = CreateQueueRequest.builder().queueName(TRADING_MESSAGING_QUEUE).build();
+			try {
+				sqsClient.createQueue(queueName);
+			} catch (Exception e) {
+				System.out.println(e.getLocalizedMessage());
+				System.out.println("queue exists");
+			}
 		}
 	}
 
