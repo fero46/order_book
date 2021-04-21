@@ -9,6 +9,7 @@ import io.meduse.data.ExchangeConfiguration;
 import io.meduse.exchange.Order;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
+import software.amazon.awssdk.services.sqs.model.CreateQueueResponse;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
@@ -17,15 +18,19 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 public class TradingOrders {
 	private static final String TRADING_MESSAGING_QUEUE = ExchangeConfiguration.AWS_INCOMMING_QUEUE_NAME;
 	
-	
+	private static boolean CREATED = false;
 	private final SqsClient sqsClient;
 
 	public TradingOrders(SqsClient sqsClient) {
 		this.sqsClient = sqsClient;
-		if (ExchangeConfiguration.TRY_TO_CREATE_QUEUE == "yes") {
+		if (ExchangeConfiguration.TRY_TO_CREATE_QUEUE == "yes" && !TradingOrders.CREATED) {
 			CreateQueueRequest queueName = CreateQueueRequest.builder().queueName(TRADING_MESSAGING_QUEUE).build();
 			try {
-				sqsClient.createQueue(queueName);
+				CreateQueueResponse createQueue = sqsClient.createQueue(queueName);
+				String string = createQueue.toString();
+				System.out.println(string);
+				TradingOrders.CREATED=true;
+				
 			} catch (Exception e) {
 				System.out.println(e.getLocalizedMessage());
 				System.out.println("queue exists");
@@ -45,12 +50,19 @@ public class TradingOrders {
 
 		List<Message> messages = sqsClient.receiveMessage(receiveRequest).messages();
 		for (Message message : messages) {
-			String body = message.body();
-			DeleteMessageRequest deleteMessage = DeleteMessageRequest.builder().queueUrl(queueUrl)
-					.receiptHandle(message.receiptHandle()).build();
-			sqsClient.deleteMessage(deleteMessage);
-			Order order = Order.fromMessageBody(body);
-			result.add(order);
+		  try {
+	      String body = message.body();
+	      DeleteMessageRequest deleteMessage = DeleteMessageRequest.builder().queueUrl(queueUrl)
+	          .receiptHandle(message.receiptHandle()).build();
+	      sqsClient.deleteMessage(deleteMessage);
+	      Order order = Order.fromMessageBody(body);
+	      if(order != null) {	        
+	        result.add(order);		    
+	      }
+		  }catch (Exception e) {
+		    e.printStackTrace();
+      }
+
 		}
 		return result;
 	}

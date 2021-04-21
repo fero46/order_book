@@ -1,5 +1,6 @@
 package io.meduse.processors;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import io.meduse.exchange.Order;
@@ -17,7 +18,7 @@ public class MarketOrder extends LimitOrder {
 	public List<OrderMessage> process() {
 		List<OrderMessage> result = super.process();
 
-		if (order.getVolume() > 0l) {
+		if (order.getVolume().compareTo(BigDecimal.ZERO) > 0l) {
 			result.add(new MarketOrderNotFinished(order.getId()));
 		}
 
@@ -25,7 +26,7 @@ public class MarketOrder extends LimitOrder {
 	}
 
 	@Override
-	protected boolean pricePointExceeded(int priceCompare, Long pricePoint) {
+	protected boolean pricePointExceeded(int priceCompare, BigDecimal pricePoint) {
 		return false;
 	}
 

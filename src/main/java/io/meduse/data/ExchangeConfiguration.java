@@ -11,7 +11,7 @@ public class ExchangeConfiguration {
 
 	public static final String TRY_TO_CREATE_QUEUE = loadStringValue("TRY_TO_CREATE_QUEUE", "yes");
 
-	public static final int WEB_SERVICE_PORT = loadIntValue("TRY_TO_CREATE_QUEUE", 8080);
+	public static final int WEB_SERVICE_PORT = loadIntValue("WEB_SERVICE_PORT", 8080);
 
 	private static String loadStringValue(String env, String defaultValue) {
 		if (System.getenv(env) == null) {

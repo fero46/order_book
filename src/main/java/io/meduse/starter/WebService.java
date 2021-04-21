@@ -20,18 +20,20 @@ public class WebService implements Runnable {
 	}
 
 	public void init() {
-		run();
-		//new Thread(this).run();
+		new Thread(this).run();
 	}
 
 	@Override
 	public void run() {
 		System.out.println("Start Webservice");
 		port(ExchangeConfiguration.WEB_SERVICE_PORT);
+		
 		get("/market", (request, response) -> {
-			return new MarketData(marketManager);
+		  System.out.println("GET /market REQUEST INCOMMING");
+		  return new MarketData(marketManager);
 		}, new JsonTransformer());
 		get("/market/:id", (request, response) -> {
+		  System.out.println("GET /market REQUEST INCOMMING");
 			String id = request.params(":id");
 			return new MarketDetail(marketManager, id);
 		}, new JsonTransformer());
