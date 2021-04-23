@@ -41,7 +41,7 @@ public class LimitOrder implements Processor {
     if (order.getDirection() == Order.BID) {
 //			System.out.println("Kauf Order");
       if (order.getType() == Order.LIMIT_ORDER) {
-        orders = market.getAsks().tailSet(order.getPrice(), true);
+        orders = market.getAsks().headSet(order.getPrice(), true);
       } else {
         orders = market.getAsks();
       }

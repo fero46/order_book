@@ -50,5 +50,46 @@ public class LimitOrderTest {
     assertEquals(5l, buckets.get(new BigDecimal(895l)).getVolume().longValue());
     assertEquals(market.getLastPrice().compareTo(new BigDecimal(895l)), 0);
   }
+  
+  @Test 
+  public void testLimitBuy() {
+    OrderBook market = new OrderBook();
+
+    BigDecimal volume = new BigDecimal(10l);
+    BigDecimal price = new BigDecimal(895l);
+    Order bid = new Order("1", "btcusdt", price, volume, Order.LIMIT_ORDER, Order.ASK);
+    market.add(bid);
+    bid = new Order("2", "btcusdt", price, volume, Order.LIMIT_ORDER, Order.ASK);
+    market.add(bid);
+    price = new BigDecimal(901l);
+    bid = new Order("3", "btcusdt", price, volume, Order.LIMIT_ORDER, Order.ASK);
+    market.add(bid);
+
+    price = new BigDecimal(801l);
+    bid = new Order("5", "btcusdt", price, volume, Order.LIMIT_ORDER, Order.ASK);
+    market.add(bid);
+
+    Order marketOrder = new Order("6", "btcusdt", new BigDecimal(895l), new BigDecimal(30l), Order.LIMIT_ORDER, Order.BID);
+
+    List<OrderMessage> messages = new LimitOrder(market, marketOrder).process();
+
+    assertEquals(3, messages.size());
+    for (int i = 0; i < 3; i++) {
+      assertEquals("io.meduse.messages.OrderMatch", messages.get(i).getClass().getName());
+    }
+
+    
+    for (OrderMessage message : messages) {
+      System.out.println(message.tickerMessage());
+    }
+
+    NavigableSet<BigDecimal> asks = market.getAsks();
+    Map<BigDecimal, Bucket> buckets = market.getAskBucket();
+    System.out.println(asks);
+
+    assertEquals(1, asks.size());
+    assertEquals(10l, buckets.get(new BigDecimal(901l)).getVolume().longValue());
+    assertEquals(market.getLastPrice().compareTo(new BigDecimal(895l)), 0);
+  }
 
 }
