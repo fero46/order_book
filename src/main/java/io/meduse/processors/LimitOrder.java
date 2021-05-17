@@ -103,10 +103,10 @@ public class LimitOrder implements Processor {
         }
         Bucket bucket = buckets.get(pricePoint);
         for (String id : bucket.getIds()) {
-          if (order.getMarketOrder()) {
+          Order o = bucket.getOrder(id);
+          if (o != null && order.getMarketOrder()) {
             throw new MarketPlacementException();
           }
-          Order o = bucket.getOrder(id);
           if (o.getVolume().compareTo(order.getVolume()) >= 0) {
             bucket.reduceVolume(id, order.getVolume());
             result.add(new OrderMatch(order.getId(), o.getId(), o.getPrice(), order.getVolume()));

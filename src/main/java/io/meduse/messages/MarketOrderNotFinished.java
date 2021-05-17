@@ -43,7 +43,7 @@ public class MarketOrderNotFinished implements OrderMessage{
   @Override
   public String to_json_string() {
     JsonObject json = new JsonObject();
-    json.addProperty("id", makerId());
+    json.addProperty("id", getId());
     json.addProperty("success", false);
     json.addProperty("action", "market");
     json.addProperty("secret", ExchangeConfiguration.CALL_BACK_SECRET);

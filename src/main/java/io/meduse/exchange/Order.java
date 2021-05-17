@@ -93,13 +93,14 @@ public class Order {
         direction = Order.BID;
       }
 
-      if (map.containsKey("marketOrder")) {
-        marketOrder = map.get("marketOrder") == "true";
+      if (map.containsKey("market_maker")) {
+        marketOrder = map.get("market_maker") == "true";
       }
 
       if (direction != -1 && type != -1 && volume.compareTo(BigDecimal.ZERO) > 0
           && (type == Order.MARKET_ORDER || price.compareTo(BigDecimal.ZERO) > 0)) {
-        return new Order(id, market, price, volume, type, direction, marketOrder);
+        Order order = new Order(id, market, price, volume, type, direction, marketOrder);
+        return order;
       }
 
     } catch (Exception e) {
