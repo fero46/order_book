@@ -6,4 +6,5 @@ public interface OrderMessage {
 	public String makerId();
 	public String takerId();
 	public String tickerMessage();
+  public String to_json_string();
 }

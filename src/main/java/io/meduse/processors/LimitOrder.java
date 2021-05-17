@@ -9,6 +9,7 @@ import java.util.NavigableSet;
 import io.meduse.data.Bucket;
 import io.meduse.exchange.Order;
 import io.meduse.exchange.OrderBook;
+import io.meduse.messages.MarketPlacementError;
 import io.meduse.messages.OrderInBook;
 import io.meduse.messages.OrderMatch;
 import io.meduse.messages.OrderMessage;
@@ -61,12 +62,18 @@ public class LimitOrder implements Processor {
     }
 //		System.out.println("Preis: " + order.getPrice());
 
-    List<OrderMessage> result = iterateOrders(orders, priceCompare);
-    if (shouldAddRemainingOrder()) {
-      market.add(order);
-      result.add(new OrderInBook(order));
+    List<OrderMessage> result;
+    try {
+      result = iterateOrders(orders, priceCompare);
+      if (shouldAddRemainingOrder()) {
+        market.add(order);
+        result.add(new OrderInBook(order));
+      }
+//      System.out.println("=================================");
+    } catch (MarketPlacementException e) {
+      result = new ArrayList<OrderMessage>();
+      result.add(new MarketPlacementError(order));
     }
-//		System.out.println("=================================");
 
     return result;
   }
@@ -82,8 +89,10 @@ public class LimitOrder implements Processor {
    * @param result
    * @param orders
    * @param priceCompare
+   * @throws MarketPlacementException
    */
-  protected List<OrderMessage> iterateOrders(NavigableSet<BigDecimal> orders, int priceCompare) {
+  protected List<OrderMessage> iterateOrders(NavigableSet<BigDecimal> orders, int priceCompare)
+      throws MarketPlacementException {
     List<OrderMessage> result = new ArrayList<OrderMessage>();
     List<Order> orderToRemove = new ArrayList<Order>();
 
@@ -94,6 +103,9 @@ public class LimitOrder implements Processor {
         }
         Bucket bucket = buckets.get(pricePoint);
         for (String id : bucket.getIds()) {
+          if (order.getMarketOrder()) {
+            throw new MarketPlacementException();
+          }
           Order o = bucket.getOrder(id);
           if (o.getVolume().compareTo(order.getVolume()) >= 0) {
             bucket.reduceVolume(id, order.getVolume());

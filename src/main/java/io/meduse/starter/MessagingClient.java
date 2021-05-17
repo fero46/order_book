@@ -3,13 +3,13 @@ package io.meduse.starter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.concurrent.LinkedTransferQueue;
 
 import io.meduse.data.ExchangeConfiguration;
 import io.meduse.exchange.MarketManager;
 import io.meduse.exchange.Order;
 import io.meduse.messages.OrderMessage;
 import io.meduse.queue.TradingOrders;
-import io.meduse.queue.TradingResults;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -19,12 +19,14 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 public class MessagingClient implements Runnable {
 
   private final MarketManager marketManager;
+  private final LinkedTransferQueue<OrderMessage> queue;
 
   private SqsClient sqsClient;
 
-  public MessagingClient(MarketManager marketManager) {
+  public MessagingClient(MarketManager marketManager, LinkedTransferQueue<OrderMessage> queue) {
 
     this.marketManager = marketManager;
+    this.queue = queue;
     AwsCredentialsProvider credsV2 = StaticCredentialsProvider.create(AwsBasicCredentials
         .create(ExchangeConfiguration.AWS_ACCESS_KEY, ExchangeConfiguration.AWS_ACCESS_PASSWORD));
     URI endpointOverride;
@@ -46,7 +48,6 @@ public class MessagingClient implements Runnable {
   public void run() {
     while (true) {
       TradingOrders tradingOrders = new TradingOrders(sqsClient);
-      TradingResults tradingResults = new TradingResults(sqsClient);
       List<Order> orders = tradingOrders.getOrders();
       if (orders.size() > 0) {
         System.out.println("New Orders are incomming.");
@@ -54,8 +55,10 @@ public class MessagingClient implements Runnable {
       }
       for (Order order : orders) {
         System.out.println("Processing incomming orders");
-        List<OrderMessage> processOrder = marketManager.processOrder(order);
-        tradingResults.sendResults(processOrder);
+        List<OrderMessage> processOrders = marketManager.processOrder(order);
+        for (OrderMessage message : processOrders) {
+          queue.add(message);
+        }
       }
     }
   }

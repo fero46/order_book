@@ -2,6 +2,10 @@ package io.meduse.messages;
 
 import java.math.BigDecimal;
 
+import com.google.gson.JsonObject;
+
+import io.meduse.data.ExchangeConfiguration;
+
 public class OrderMatch implements OrderMessage {
 
   BigDecimal price;
@@ -41,6 +45,18 @@ public class OrderMatch implements OrderMessage {
   public String tickerMessage() {
     return "Order with id " + takerId + " takes Order with id " + makerId + " " + volume
         + " for the price " + price;
+  }
+  
+  @Override
+  public String to_json_string() {
+    JsonObject json = new JsonObject();
+    json.addProperty("id", takerId());
+    json.addProperty("success", true);
+    json.addProperty("action", "match");
+    json.addProperty("maker", makerId());
+    json.addProperty("volume", getVolume());
+    json.addProperty("secret", ExchangeConfiguration.CALL_BACK_SECRET);
+    return json.toString();
   }
 
 }

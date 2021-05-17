@@ -1,5 +1,8 @@
 package io.meduse.messages;
 
+import com.google.gson.JsonObject;
+
+import io.meduse.data.ExchangeConfiguration;
 import io.meduse.exchange.Order;
 
 public class OrderInBook implements OrderMessage {
@@ -17,8 +20,7 @@ public class OrderInBook implements OrderMessage {
 
 	@Override
 	public String makerId() {
-		// TODO Auto-generated method stub
-		return null;
+		return order.getId();
 	}
 
 	@Override
@@ -32,5 +34,15 @@ public class OrderInBook implements OrderMessage {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+  @Override
+  public String to_json_string() {
+    JsonObject json = new JsonObject();
+    json.addProperty("id", makerId());
+    json.addProperty("success", true);
+    json.addProperty("action", "order");
+    json.addProperty("secret", ExchangeConfiguration.CALL_BACK_SECRET);
+    return json.toString();
+  }
 
 }

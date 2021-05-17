@@ -20,15 +20,25 @@ public class Order {
   private String market;
   private int type;
   private int direction;
+  private boolean marketOrder;
 
   public Order(String id, String market, BigDecimal price, BigDecimal volume, int type,
       int direction) {
+    this(id, market, price, volume, type, direction, false);
+  }
+
+  public Order(String id, String market, BigDecimal price, BigDecimal volume, int type,
+      int direction, boolean marketOrder) {
     this.id = id;
     this.market = market;
     this.price = price;
-    this.volume = volume;
     this.type = type;
     this.direction = direction;
+    this.marketOrder = marketOrder;
+  }
+
+  public boolean getMarketOrder() {
+    return marketOrder;
   }
 
   public BigDecimal getPrice() {
@@ -68,6 +78,7 @@ public class Order {
       int direction = -1;
       String id = map.get("id");
       String market = map.get("market");
+      boolean marketOrder = false;
 
       if ("limit".equals(map.get("type"))) {
         type = Order.LIMIT_ORDER;
@@ -81,18 +92,17 @@ public class Order {
         direction = Order.BID;
       }
 
-      System.out.println(direction);
-      System.out.println(type);
-      System.out.println(volume);
-      System.out.println(price);
+      if (map.containsKey("marketOrder")) {
+        marketOrder = map.get("marketOrder") == "true";
+      }
 
       if (direction != -1 && type != -1 && volume.compareTo(BigDecimal.ZERO) > 0
           && (type == Order.MARKET_ORDER || price.compareTo(BigDecimal.ZERO) > 0)) {
-        return new Order(id, market, price, volume, type, direction);
+        return new Order(id, market, price, volume, type, direction, marketOrder);
       }
 
     } catch (Exception e) {
-     // e.printStackTrace();
+      // e.printStackTrace();
     }
     return null;
   }
