@@ -20,7 +20,7 @@ public class WebService implements Runnable {
 	}
 
 	public void init() {
-		new Thread(this).run();
+		new Thread(this).start();
 	}
 
 	@Override

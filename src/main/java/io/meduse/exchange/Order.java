@@ -34,6 +34,7 @@ public class Order {
     this.price = price;
     this.type = type;
     this.direction = direction;
+    this.volume = volume;
     this.marketOrder = marketOrder;
   }
 

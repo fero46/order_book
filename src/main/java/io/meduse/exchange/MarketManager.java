@@ -49,7 +49,8 @@ public class MarketManager {
         return new CancleOrder(market, order).process();
       }
     }
-    return null;
+    System.out.println(order.toString());
+    return new ArrayList<OrderMessage>();
   }
 
   public List<String> allMarkets() {

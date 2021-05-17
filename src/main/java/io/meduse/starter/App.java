@@ -3,6 +3,8 @@
  */
 package io.meduse.starter;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
 
 import io.meduse.exchange.MarketManager;
@@ -20,10 +22,10 @@ public class App {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-	  final LinkedTransferQueue<OrderMessage> queue = new LinkedTransferQueue<OrderMessage>();
+	  final BlockingQueue<OrderMessage> queue = new LinkedBlockingQueue<OrderMessage>();
 		MarketManager marketmanager = MarketManager.instance();
 		new WebService(marketmanager).init();
-		new WebServiceCommunicator(queue).init();
+    new WebServiceCommunicator(queue).init();
 		MessagingClient messagingClient = new MessagingClient(marketmanager, queue);
 		messagingClient.process();
 	}

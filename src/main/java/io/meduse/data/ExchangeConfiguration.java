@@ -16,7 +16,7 @@ public class ExchangeConfiguration {
   public static final String TRY_TO_CREATE_QUEUE = loadStringValue("TRY_TO_CREATE_QUEUE", "yes");
 
   public static final int WEB_SERVICE_PORT = loadIntValue("WEB_SERVICE_PORT", 8080);
-  public static final String CALL_BACK_HOST = loadStringValue("CALL_BACK_HOST", "localhost");
+  public static final String CALL_BACK_HOST = loadStringValue("CALL_BACK_HOST", "http://localhost");
   public static final int CALL_BACK_PORT = loadIntValue("CALL_BACK_PORT", 5200);
   public static final String CALL_BACK_PATH = loadStringValue("CALL_BACK_SECRET", "/api/internal/order_book");
 

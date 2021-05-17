@@ -15,6 +15,8 @@ public class Bucket {
   BigDecimal volume = BigDecimal.ZERO;
 
   public boolean add(Order order) {
+//    System.out.println("ORDER VOLUMENT " + order.getVolume());
+//    System.out.println("volume " + volume);
     volume = volume.add(order.getVolume());
     orderMap.put(order.getId(), order);
     return ids.add(order.getId());

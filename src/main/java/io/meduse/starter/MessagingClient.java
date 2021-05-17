@@ -3,6 +3,8 @@ package io.meduse.starter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
 
 import io.meduse.data.ExchangeConfiguration;
@@ -19,11 +21,11 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 public class MessagingClient implements Runnable {
 
   private final MarketManager marketManager;
-  private final LinkedTransferQueue<OrderMessage> queue;
+  private final BlockingQueue<OrderMessage> queue;
 
   private SqsClient sqsClient;
 
-  public MessagingClient(MarketManager marketManager, LinkedTransferQueue<OrderMessage> queue) {
+  public MessagingClient(MarketManager marketManager, BlockingQueue<OrderMessage> queue) {
 
     this.marketManager = marketManager;
     this.queue = queue;
@@ -41,7 +43,7 @@ public class MessagingClient implements Runnable {
 
   public void process() {
     Thread newThread = new Thread(this);
-    newThread.run();
+    newThread.start();
   }
 
   @Override
@@ -57,8 +59,13 @@ public class MessagingClient implements Runnable {
         System.out.println("Processing incomming orders");
         List<OrderMessage> processOrders = marketManager.processOrder(order);
         for (OrderMessage message : processOrders) {
-          queue.add(message);
+          try {
+            queue.put(message);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
         }
+        System.out.println("queue size" + queue.size());
       }
     }
   }
