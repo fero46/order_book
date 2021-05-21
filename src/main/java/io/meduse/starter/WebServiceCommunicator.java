@@ -7,9 +7,13 @@ import java.util.concurrent.LinkedTransferQueue;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 
 import io.meduse.data.ExchangeConfiguration;
 import io.meduse.messages.OrderMessage;
@@ -56,11 +60,17 @@ public class WebServiceCommunicator implements Runnable {
   }
 
   public void post(String data) throws Exception {
-    HttpClient client = new DefaultHttpClient();
-    HttpPost post = new HttpPost(uri.toString());
+    CloseableHttpClient client = HttpClients.createDefault();
+    HttpPost httpPost = new HttpPost(uri.toString());
     StringEntity entity = new StringEntity(data);
-    post.setEntity(entity);
-    client.execute(post);
+    httpPost.setEntity(entity);
+    CloseableHttpResponse response = client.execute(httpPost);
+    client.close();
+    if (response.getStatusLine().getStatusCode() != 200) {
+      throw new Exception("Error CALLBACK doesn't return 200 returns : "
+          + response.getStatusLine().getStatusCode());
+    }
+    
   }
 
 }
